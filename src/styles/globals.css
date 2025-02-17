@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-background text-primary-dark antialiased;
+  }
+  
+  h1, h2, h3, h4 {
+    @apply font-display;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center px-6 py-3 rounded-full font-medium transition-all duration-200 transform hover:scale-[1.02];
+  }
+  
+  .btn-primary {
+    @apply btn bg-primary text-white hover:bg-primary-dark;
+  }
+  
+  .btn-secondary {
+    @apply btn bg-secondary text-primary hover:bg-opacity-90;
+  }
+  
+  .btn-accent {
+    @apply btn bg-accent text-white hover:bg-opacity-90;
+  }
+  
+  .card {
+    @apply bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow p-6;
+  }
+  
+  .input {
+    @apply w-full rounded-lg border-secondary focus:border-primary focus:ring-1 focus:ring-primary bg-white/50;
+  }
+  
+  .nav-link {
+    @apply text-primary-dark hover:text-primary transition-colors px-4 py-2 rounded-full hover:bg-secondary/30;
+  }
+}
+
+/* Custom animations */
+.hover-lift {
+  @apply transition-transform duration-200 hover:-translate-y-1;
+}
+
+.hover-glow {
+  @apply transition-all duration-200 hover:shadow-lg hover:shadow-primary/10;
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Loading skeleton animation */
+.skeleton {
+  @apply animate-pulse bg-secondary/30 rounded;
+}
