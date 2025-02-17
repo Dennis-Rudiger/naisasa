@@ -1,101 +1,140 @@
-import Image from "next/image";
+'use client'
+
+import { useState } from 'react'
+import Image from 'next/image'
+import Link from 'next/link'
+import { MagnifyingGlassIcon, CalendarIcon, MapPinIcon, ArrowRightIcon } from '@heroicons/react/24/outline'
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [searchQuery, setSearchQuery] = useState('')
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  return (
+    <div className="min-h-screen">
+      {/* Hero Section */}
+      <section className="relative h-[80vh] flex items-center">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary-dark/90 to-primary/80" />
+        <div className="absolute inset-0">
+          <Image
+            src="/images/hero.jpg"
+            alt="Events background"
+            fill
+            className="object-cover"
+            priority
+          />
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 text-white">
+          <div className="max-w-3xl">
+            <h1 className="text-5xl md:text-6xl font-display font-bold mb-6 animate-fade-down">
+              Discover Amazing Events in Your Area
+            </h1>
+            <p className="text-xl mb-8 text-secondary/90 animate-fade-up">
+              Find and book tickets for concerts, workshops, sports events and more
+            </p>
+
+            <div className="flex items-center bg-white/10 backdrop-blur-md rounded-full p-2 mb-8">
+              <input
+                type="text"
+                placeholder="Search events..."
+                className="w-full bg-transparent border-none text-white placeholder-white/70 focus:ring-0"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <button className="btn-accent">
+                <MagnifyingGlassIcon className="h-6 w-6" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Categories */}
+      <section className="py-16 bg-background">
+        <div className="max-w-7xl mx-auto px-4">
+          <h2 className="text-3xl font-display font-bold mb-8">Browse Categories</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {categories.map((category) => (
+              <Link
+                key={category.name}
+                href={`/events?category=${category.name}`}
+                className="group hover-lift hover-glow"
+              >
+                <div className="card text-center">
+                  <category.icon className="h-12 w-12 mx-auto mb-4 text-primary group-hover:text-accent transition-colors" />
+                  <h3 className="font-display font-medium">{category.name}</h3>
+                  <p className="text-sm text-gray-600 mt-2">{category.count} Events</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Trending Events */}
+      <section className="py-16">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-3xl font-display font-bold">Trending Events</h2>
+            <Link href="/events" className="btn-primary">
+              View All <ArrowRightIcon className="h-5 w-5 ml-2" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {trendingEvents.map((event) => (
+              <Link
+                key={event.id}
+                href={`/events/${event.id}`}
+                className="card hover-lift hover-glow"
+              >
+                <div className="relative aspect-[16/9] rounded-xl overflow-hidden mb-4">
+                  <Image
+                    src={event.image}
+                    alt={event.title}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h3 className="font-display font-bold text-xl mb-2">{event.title}</h3>
+                    <div className="flex items-center text-gray-600 text-sm mb-2">
+                      <CalendarIcon className="h-4 w-4 mr-2" />
+                      {event.date}
+                    </div>
+                    <div className="flex items-center text-gray-600 text-sm">
+                      <MapPinIcon className="h-4 w-4 mr-2" />
+                      {event.location}
+                    </div>
+                  </div>
+                  <span className="text-success font-medium">
+                    KES {event.price}
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
     </div>
-  );
+  )
 }
+
+const categories = [
+  { name: 'Music', icon: MagnifyingGlassIcon, count: 42 },
+  { name: 'Sports', icon: CalendarIcon, count: 28 },
+  { name: 'Arts', icon: MapPinIcon, count: 35 },
+  { name: 'Food', icon: ArrowRightIcon, count: 21 },
+]
+
+const trendingEvents = [
+  {
+    id: 1,
+    title: 'Summer Music Festival',
+    date: 'Aug 15, 2024',
+    location: 'Nairobi',
+    price: '2,500',
+    image: '/images/event1.jpg',
+  },
+  // Add more events...
+]
