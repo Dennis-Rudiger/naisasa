@@ -1,82 +1,61 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useCart } from '@/context/CartContext'
-import { paymentSchema, type PaymentFormData } from '@/lib/validations/payment'
-import { processPayment, PaymentError } from '@/lib/payment'
-import { LockClosedIcon } from '@heroicons/react/24/outline'
+import Image from 'next/image'
+import { PhoneIcon } from '@heroicons/react/24/outline'
 import toast from 'react-hot-toast'
+import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import Image from 'next/image'
+
+const checkoutSchema = z.object({
+  phone: z.string()
+    .regex(/^254[17]\d{8}$/, 'Please enter a valid Safaricom number starting with 254')
+})
+
+type CheckoutForm = z.infer<typeof checkoutSchema>
 
 export default function CheckoutPage() {
   const [isProcessing, setIsProcessing] = useState(false)
   const { data: session } = useSession()
   const router = useRouter()
   const { state: cart, clearCart } = useCart()
-  
+
   const {
     register,
     handleSubmit,
     formState: { errors }
-  } = useForm<PaymentFormData>({
-    resolver: zodResolver(paymentSchema)
+  } = useForm<CheckoutForm>({
+    resolver: zodResolver(checkoutSchema)
   })
 
-  // Redirect if cart is empty
-  useEffect(() => {
-    if (cart.items.length === 0) {
-      toast.error('Your cart is empty')
-      router.push('/')
-    }
-  }, [cart.items.length, router])
-
-  // Handle authentication
-  useEffect(() => {
-    if (!session) {
-      router.push('/auth/login?callbackUrl=/checkout')
-    }
-  }, [session, router])
-
-  if (!session || cart.items.length === 0) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse">Loading...</div>
-      </div>
-    )
-  }
-
-  const onSubmit = async (data: PaymentFormData) => {
+  const onSubmit = async (data: CheckoutForm) => {
     try {
       setIsProcessing(true)
       
-      const result = await processPayment(data, cart.total)
-      
-      if (result.success) {
-        await fetch('/api/orders', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            items: cart.items,
-            total: cart.total,
-            transactionId: result.transactionId
-          })
+      const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cartItems: cart.items,
+          phone: data.phone,
+          total: cart.total
         })
+      })
 
-        clearCart()
-        toast.success('Payment successful!')
-        router.push('/orders')
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Payment failed')
       }
+
+      toast.success('Check your phone to complete MPesa payment')
+      router.push(`/payment/status?id=${result.paymentId}`)
     } catch (error) {
-      if (error instanceof PaymentError) {
-        toast.error(error.message)
-      } else {
-        toast.error('An unexpected error occurred')
-        console.error(error)
-      }
+      toast.error(error instanceof Error ? error.message : 'Payment failed')
     } finally {
       setIsProcessing(false)
     }
@@ -118,82 +97,53 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          {/* Payment Form */}
+          {/* MPesa Payment */}
           <div>
-            <h2 className="text-2xl font-display font-bold mb-6">Payment Details</h2>
-            <form 
-              onSubmit={handleSubmit(onSubmit)} 
-              className="bg-white rounded-xl shadow-sm p-6 space-y-6"
-            >
-              <div className="space-y-4">
+            <h2 className="text-2xl font-display font-bold mb-6">MPesa Payment</h2>
+            <div className="bg-white rounded-xl shadow-sm p-6">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Card Number
+                    Safaricom M-PESA Number
                   </label>
-                  <input
-                    {...register('cardNumber')}
-                    type="text"
-                    className={`input ${errors.cardNumber ? 'border-red-500' : ''}`}
-                    placeholder="1234 5678 9012 3456"
-                    disabled={isProcessing}
-                  />
-                  {errors.cardNumber && (
-                    <p className="mt-1 text-sm text-red-500">{errors.cardNumber.message}</p>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <PhoneIcon className="h-5 w-5 text-gray-400" />
+                    </div>
+                    <input
+                      {...register('phone')}
+                      type="tel"
+                      placeholder="254712345678"
+                      className={`pl-10 input ${errors.phone ? 'border-red-500' : ''}`}
+                      disabled={isProcessing}
+                    />
+                  </div>
+                  {errors.phone && (
+                    <p className="mt-1 text-sm text-red-500">{errors.phone.message}</p>
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Expiry Date
-                    </label>
-                    <input
-                      {...register('expiryDate')}
-                      type="text"
-                      className={`input ${errors.expiryDate ? 'border-red-500' : ''}`}
-                      placeholder="MM/YY"
-                      disabled={isProcessing}
-                    />
-                    {errors.expiryDate && (
-                      <p className="mt-1 text-sm text-red-500">{errors.expiryDate.message}</p>
-                    )}
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      CVC
-                    </label>
-                    <input
-                      {...register('cvc')}
-                      type="text"
-                      className={`input ${errors.cvc ? 'border-red-500' : ''}`}
-                      placeholder="123"
-                      disabled={isProcessing}
-                    />
-                    {errors.cvc && (
-                      <p className="mt-1 text-sm text-red-500">{errors.cvc.message}</p>
-                    )}
-                  </div>
+                <div className="bg-blue-50 text-blue-700 p-4 rounded-lg text-sm">
+                  <p>You will receive an MPesa prompt on your phone to complete the payment.</p>
+                  <p className="mt-2 font-medium">Amount: KES {cart.total.toFixed(2)}</p>
                 </div>
-              </div>
 
-              <button 
-                type="submit"
-                className="w-full btn-primary flex items-center justify-center gap-2"
-                disabled={isProcessing}
-              >
-                {isProcessing ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>Processing...</span>
-                  </>
-                ) : (
-                  <>
-                    <LockClosedIcon className="h-5 w-5" />
-                    <span>Pay KES {cart.total.toFixed(2)}</span>
-                  </>
-                )}
-              </button>
-            </form>
+                <button
+                  type="submit"
+                  className="w-full btn-primary"
+                  disabled={isProcessing}
+                >
+                  {isProcessing ? (
+                    <div className="flex items-center justify-center">
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span className="ml-2">Processing...</span>
+                    </div>
+                  ) : (
+                    'Pay with MPesa'
+                  )}
+                </button>
+              </form>
+            </div>
           </div>
         </div>
       </div>

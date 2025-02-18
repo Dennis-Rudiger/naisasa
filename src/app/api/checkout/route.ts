@@ -11,8 +11,8 @@ const checkoutSchema = z.object({
     quantity: z.number().min(1),
     price: z.number().positive(),
   })),
-  paymentMethod: z.enum(['mpesa', 'card', 'paypal']),
-  phone: z.string().optional(),
+  phone: z.string()
+    .regex(/^254[17]\d{8}$/, 'Please enter a valid Safaricom number starting with 254'),
   total: z.number().positive(),
 })
 
@@ -20,98 +20,77 @@ export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const body = await req.json()
     const validatedData = checkoutSchema.parse(body)
-    let paymentRecord
 
-    // Create payment record
-    try {
-      paymentRecord = await prisma.payment.create({
-        data: {
-          amount: validatedData.total,
-          provider: validatedData.paymentMethod,
-          status: 'PENDING',
-        }
-      })
-    } catch (error) {
-      console.error('Payment record creation failed:', error)
-      throw new Error('Failed to initialize payment')
+    // First, verify all events exist and are available
+    const events = await prisma.event.findMany({
+      where: {
+        id: {
+          in: validatedData.cartItems.map(item => item.id)
+        },
+        status: 'ACTIVE'
+      }
+    })
+
+    if (events.length !== validatedData.cartItems.length) {
+      return NextResponse.json(
+        { error: 'One or more events are not available' },
+        { status: 400 }
+      )
     }
 
-    // Handle different payment methods
-    switch (validatedData.paymentMethod) {
-      case 'mpesa':
-        if (!validatedData.phone) {
-          throw new Error('Phone number required for M-Pesa payment')
-        }
-        
-        const mpesaResponse = await mpesa.stkPush({
-          amount: validatedData.total,
-          phone: validatedData.phone,
-          reference: paymentRecord.id
-        })
+    // Create the payment first
+    const payment = await prisma.payment.create({
+      data: {
+        amount: validatedData.total,
+        provider: 'MPESA',
+        status: 'PENDING',
+        referenceId: null
+      }
+    })
 
-        if (!mpesaResponse.success) {
-          throw new Error('M-Pesa payment failed')
-        }
-        break
-
-      case 'card':
-        // Implement card payment logic
-        throw new Error('Card payment not implemented yet')
-
-      case 'paypal':
-        // Implement PayPal payment logic
-        throw new Error('PayPal payment not implemented yet')
-
-      default:
-        throw new Error('Invalid payment method')
-    }
-
-    // Create tickets
-    const tickets = await prisma.ticket.createMany({
+    // Then create tickets with the payment ID
+    await prisma.ticket.createMany({
       data: validatedData.cartItems.map(item => ({
         eventId: item.id,
         userId: session.user.id,
         quantity: item.quantity,
         totalPrice: item.price * item.quantity,
         status: 'PENDING',
-        paymentId: paymentRecord.id
+        paymentId: payment.id
       }))
     })
 
-    // Update payment record with ticket information
-    await prisma.payment.update({
-      where: { id: paymentRecord.id },
-      data: {
-        status: validatedData.paymentMethod === 'mpesa' ? 'PENDING' : 'COMPLETED'
-      }
+    // Initiate MPesa STK Push
+    const mpesaResponse = await mpesa.stkPush({
+      amount: validatedData.total,
+      phone: validatedData.phone,
+      reference: payment.id
     })
+
+    if (!mpesaResponse.success) {
+      // Update payment status to failed if STK push fails
+      await prisma.payment.update({
+        where: { id: payment.id },
+        data: { status: 'FAILED' }
+      })
+      throw new Error('MPesa payment initiation failed')
+    }
 
     return NextResponse.json({
       success: true,
-      paymentId: paymentRecord.id,
-      tickets
+      checkoutRequestId: mpesaResponse.checkoutRequestId,
+      paymentId: payment.id,
     })
 
   } catch (error) {
     console.error('Checkout error:', error)
-    
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Invalid request data', details: error.errors },
-        { status: 400 }
-      )
-    }
-
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Payment processing failed' },
+      { error: error instanceof Error ? error.message : 'Payment failed' },
       { status: 500 }
     )
   }
