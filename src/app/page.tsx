@@ -1,12 +1,27 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { MagnifyingGlassIcon, CalendarIcon, MapPinIcon, ArrowRightIcon } from '@heroicons/react/24/outline'
 
+const heroImages = [
+  '/images/hero1.jpg',
+  '/images/hero2.jpg',
+  '/images/hero3.jpg'
+];
+
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState('')
+  const [currentHeroIndex, setCurrentHeroIndex] = useState(0)
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentHeroIndex((prev) => (prev + 1) % heroImages.length)
+    }, 5000) // Change image every 5 seconds
+
+    return () => clearInterval(interval)
+  }, [])
 
   return (
     <div className="min-h-screen">
@@ -15,10 +30,10 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-r from-primary-dark/90 to-primary/80" />
         <div className="absolute inset-0">
           <Image
-            src="/images/hero.jpg"
+            src={heroImages[currentHeroIndex]}
             alt="Events background"
             fill
-            className="object-cover"
+            className="object-cover transition-opacity duration-1000"
             priority
           />
         </div>
@@ -56,13 +71,27 @@ export default function Home() {
             {categories.map((category) => (
               <Link
                 key={category.name}
-                href={`/events?category=${category.name}`}
-                className="group hover-lift hover-glow"
+                href={`/events/${category.name.toLowerCase()}`} // Update href to match the folder structure
+                className="group transform transition-all duration-300 hover:scale-105"
               >
-                <div className="card text-center">
-                  <category.icon className="h-12 w-12 mx-auto mb-4 text-primary group-hover:text-accent transition-colors" />
-                  <h3 className="font-display font-medium">{category.name}</h3>
-                  <p className="text-sm text-gray-600 mt-2">{category.count} Events</p>
+                <div className="card overflow-hidden">
+                  <div className="relative h-48 mb-4 rounded-lg overflow-hidden">
+                    <Image
+                      src={category.icon}
+                      alt={category.name}
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  </div>
+                  <h3 className="font-display font-bold text-xl mb-2 group-hover:text-primary transition-colors">
+                    {category.name}
+                  </h3>
+                  <p className="text-sm text-gray-600 flex items-center justify-center">
+                    <span className="inline-block bg-primary/10 text-primary font-medium px-3 py-1 rounded-full">
+                      {category.count} Events
+                    </span>
+                  </p>
                 </div>
               </Link>
             ))}
@@ -121,10 +150,26 @@ export default function Home() {
 }
 
 const categories = [
-  { name: 'Music', icon: MagnifyingGlassIcon, count: 42 },
-  { name: 'Sports', icon: CalendarIcon, count: 28 },
-  { name: 'Arts', icon: MapPinIcon, count: 35 },
-  { name: 'Food', icon: ArrowRightIcon, count: 21 },
+  { 
+    name: 'Music', 
+    icon: '/images/categories/music.jpg', 
+    count: 42 
+  },
+  { 
+    name: 'Sports', 
+    icon: '/images/categories/sports.jpg', 
+    count: 28 
+  },
+  { 
+    name: 'Arts', 
+    icon: '/images/categories/arts.jpg', 
+    count: 35 
+  },
+  { 
+    name: 'Food', 
+    icon: '/images/categories/food.jpg', 
+    count: 21 
+  },
 ]
 
 const trendingEvents = [
@@ -136,5 +181,20 @@ const trendingEvents = [
     price: '2,500',
     image: '/images/event1.jpg',
   },
-  // Add more events...
+  {
+    id: 2,
+    title: 'Tech Conference 2024',
+    date: 'Sep 20, 2024',
+    location: 'Mombasa',
+    price: '3,000',
+    image: '/images/tech1.jpg',
+  },
+  {
+    id: 3,
+    title: 'Food & Wine Festival',
+    date: 'Oct 5, 2024',
+    location: 'Kisumu',
+    price: '1,500',
+    image: '/images/wine.jpg',
+  }
 ]

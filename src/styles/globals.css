@@ -30,7 +30,8 @@
   }
   
   .card {
-    @apply bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow p-6;
+    @apply bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 p-6 
+    border border-gray-100 hover:border-primary/20;
   }
   
   .input {
@@ -51,6 +52,16 @@
   @apply transition-all duration-200 hover:shadow-lg hover:shadow-primary/10;
 }
 
+/* Hero image transition */
+.hero-image-transition {
+  @apply transition-opacity duration-1000 ease-in-out;
+}
+
+/* Image hover effects */
+.event-card-image {
+  @apply transform transition-transform duration-300 hover:scale-105;
+}
+
 /* Smooth scroll behavior */
 html {
   scroll-behavior: smooth;
@@ -59,4 +70,15 @@ html {
 /* Loading skeleton animation */
 .skeleton {
   @apply animate-pulse bg-secondary/30 rounded;
+}
+
+/* Card animations */
+.card-hover-effect {
+  @apply transition-all duration-300;
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+.card-hover-effect:hover {
+  transform: translateY(-5px) rotateX(2deg) rotateY(2deg);
 }
