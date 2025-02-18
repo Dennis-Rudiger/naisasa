@@ -7,7 +7,7 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'Naisasa Events',
-  description: 'Discover amazing events in your area',
+  description: 'Find and book local events',
 }
 
 export default function RootLayout({
