@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useReducer, ReactNode } from 'react'
+import { createContext, useContext, useReducer, ReactNode, useEffect } from 'react'
 
 interface CartItem {
   id: string
@@ -20,6 +20,7 @@ type CartAction =
   | { type: 'REMOVE_ITEM'; payload: string }
   | { type: 'UPDATE_QUANTITY'; payload: { id: string; quantity: number } }
   | { type: 'CLEAR_CART' }
+  | { type: 'HYDRATE'; payload: Partial<CartState> }
 
 const CartContext = createContext<{
   state: CartState
@@ -77,6 +78,11 @@ function cartReducer(state: CartState, action: CartAction): CartState {
         items: [],
         total: 0
       }
+    case 'HYDRATE':
+      return {
+        ...state,
+        ...action.payload
+      }
     default:
       return state
   }
@@ -87,6 +93,27 @@ export function CartProvider({ children }: { children: ReactNode }) {
     items: [],
     total: 0
   })
+
+  // Load cart from localStorage on mount
+  useEffect(() => {
+    const savedCart = localStorage.getItem('cart')
+    if (savedCart) {
+      const parsedCart = JSON.parse(savedCart)
+      Object.keys(parsedCart).forEach(key => {
+        if (key in state) {
+          dispatch({ 
+            type: 'HYDRATE', 
+            payload: { [key]: parsedCart[key] }
+          })
+        }
+      })
+    }
+  }, [])
+
+  // Save cart to localStorage on update
+  useEffect(() => {
+    localStorage.setItem('cart', JSON.stringify(state))
+  }, [state])
 
   const addItem = (item: CartItem) => dispatch({ type: 'ADD_ITEM', payload: item })
   const removeItem = (id: string) => dispatch({ type: 'REMOVE_ITEM', payload: id })

@@ -5,6 +5,7 @@ import { Dialog, Transition } from '@headlessui/react'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 import Image from 'next/image'
 import { useCart } from '@/context/CartContext'
+import { useRouter } from 'next/navigation'
 
 interface CartProps {
   isOpen: boolean
@@ -13,6 +14,12 @@ interface CartProps {
 
 export default function Cart({ isOpen, onClose }: CartProps) {
   const { state, removeItem, updateQuantity } = useCart()
+  const router = useRouter()
+
+  const handleCheckout = () => {
+    onClose()
+    router.push('/checkout')
+  }
 
   return (
     <Transition.Root show={isOpen} as={Fragment}>
@@ -123,9 +130,7 @@ export default function Cart({ isOpen, onClose }: CartProps) {
                       <div className="mt-6">
                         <button
                           className="w-full btn-primary"
-                          onClick={() => {
-                            // Implement checkout logic
-                          }}
+                          onClick={handleCheckout}
                         >
                           Checkout
                         </button>

@@ -15,6 +15,9 @@ export default withAuth(
     callbacks: {
       authorized: ({ token }) => !!token,
     },
+    pages: {
+      signIn: "/auth/login",
+    },
   }
 );
 
@@ -24,5 +27,6 @@ export const config = {
     '/events/create',
     '/events/edit/:path*',
     '/auth/signin',
+    '/checkout/:path*',
   ],
 };
