@@ -27,6 +27,8 @@ module.exports = {
         'fade-up': 'fadeUp 0.5s ease-out',
         'fade-down': 'fadeDown 0.5s ease-out',
         'slide-in': 'slideIn 0.5s ease-out',
+        'bounce-slow': 'bounce 3s infinite',
+        'blink': 'blink 1s infinite',
       },
       keyframes: {
         fadeUp: {
@@ -40,6 +42,10 @@ module.exports = {
         slideIn: {
           '0%': { transform: 'translateX(-100%)' },
           '100%': { transform: 'translateX(0)' },
+        },
+        blink: {
+          '0%, 100%': { transform: 'scaleY(1)' },
+          '50%': { transform: 'scaleY(0.1)' },
         },
       },
     },
