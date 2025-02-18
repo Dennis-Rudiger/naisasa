@@ -1,10 +1,8 @@
 import NextAuth from 'next-auth'
-import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import bcrypt from 'bcryptjs'
-import prisma from '@/lib/prisma'
+import { verifyCredentials } from '@/lib/auth/testUtils'
 
-export const authOptions: NextAuthOptions = {
+const handler = NextAuth({
   providers: [
     CredentialsProvider({
       name: 'Credentials',
@@ -14,26 +12,16 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          throw new Error('Please enter an email and password')
+          throw new Error('Email and password required')
         }
 
-        const user = await prisma.user.findUnique({
-          where: {
-            email: credentials.email
-          }
-        })
-
-        if (!user || !user?.password) {
-          throw new Error('No user found')
-        }
-
-        const isPasswordValid = await bcrypt.compare(
-          credentials.password,
-          user.password
+        const user = await verifyCredentials(
+          credentials.email,
+          credentials.password
         )
 
-        if (!isPasswordValid) {
-          throw new Error('Invalid password')
+        if (!user) {
+          throw new Error('Invalid credentials')
         }
 
         return {
@@ -46,9 +34,7 @@ export const authOptions: NextAuthOptions = {
   ],
   pages: {
     signIn: '/auth/login',
-  },
-  session: {
-    strategy: 'jwt'
+    error: '/auth/error',
   },
   callbacks: {
     async jwt({ token, user }) {
@@ -63,8 +49,8 @@ export const authOptions: NextAuthOptions = {
       }
       return session
     }
-  }
-}
+  },
+  debug: process.env.NODE_ENV === 'development',
+})
 
-const handler = NextAuth(authOptions)
 export { handler as GET, handler as POST }

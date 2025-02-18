@@ -5,21 +5,63 @@ import Link from 'next/link'
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
 import LoginCharacter from '@/components/LoginCharacter'
 import Input from '@/components/ui/Input'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { signIn } from 'next-auth/react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import toast from 'react-hot-toast'
+
+const loginSchema = z.object({
+  email: z.string().email('Please enter a valid email'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+})
+
+type LoginForm = z.infer<typeof loginSchema>
 
 export default function LoginPage() {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const [isLoading, setIsLoading] = useState(false)
+  const callbackUrl = searchParams.get('callbackUrl') || '/'
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginForm>({
+    resolver: zodResolver(loginSchema),
   })
+
+  const onSubmit = async (data: LoginForm) => {
+    try {
+      setIsLoading(true)
+      const result = await signIn('credentials', {
+        redirect: false,
+        email: data.email,
+        password: data.password,
+      })
+
+      if (result?.error) {
+        toast.error('Invalid email or password')
+        return
+      }
+
+      toast.success('Logged in successfully')
+      router.push(callbackUrl)
+      router.refresh()
+    } catch (error) {
+      console.error('Login error:', error)
+      toast.error('An error occurred during login')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const [showPassword, setShowPassword] = useState(false)
   const [isTyping, setIsTyping] = useState(false)
   const [activeField, setActiveField] = useState<'email' | 'password' | null>(null)
   const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout>()
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    // Add login logic here
-  }
 
   const handleInputFocus = useCallback((field: 'email' | 'password' | null) => {
     setActiveField(field)
@@ -27,8 +69,6 @@ export default function LoginPage() {
   }, [])
 
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
     setIsTyping(true)
     
     if (typingTimeout) clearTimeout(typingTimeout)
@@ -66,30 +106,31 @@ export default function LoginPage() {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <Input
-              label="Email address"
-              name="email"
-              type="email"
-              required
-              value={formData.email}
-              onChange={handleInputChange}
-              onFocus={() => handleInputFocus('email')}
-              onBlur={() => handleInputFocus(null)}
-              autoComplete="email"
-            />
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <div>
+              <Input
+                {...register('email')}
+                label="Email address"
+                type="email"
+                autoComplete="email"
+                required
+                onFocus={() => handleInputFocus('email')}
+                onBlur={() => handleInputFocus(null)}
+              />
+              {errors.email && (
+                <p className="text-red-500 text-sm">{errors.email.message}</p>
+              )}
+            </div>
 
             <div className="relative">
               <Input
+                {...register('password')}
                 label="Password"
-                name="password"
                 type={showPassword ? 'text' : 'password'}
+                autoComplete="current-password"
                 required
-                value={formData.password}
-                onChange={handleInputChange}
                 onFocus={() => handleInputFocus('password')}
                 onBlur={() => handleInputFocus(null)}
-                autoComplete="current-password"
               />
               <button
                 type="button"
@@ -102,6 +143,9 @@ export default function LoginPage() {
                   <EyeIcon className="h-5 w-5" />
                 )}
               </button>
+              {errors.password && (
+                <p className="text-red-500 text-sm">{errors.password.message}</p>
+              )}
             </div>
 
             <div className="flex items-center justify-between text-sm">
@@ -117,8 +161,9 @@ export default function LoginPage() {
             <button
               type="submit"
               className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-primary to-accent text-white font-medium hover:shadow-lg hover:shadow-primary/25 transition-all duration-300"
+              disabled={isLoading}
             >
-              Sign in
+              {isLoading ? 'Signing in...' : 'Sign in'}
             </button>
 
             <p className="text-center text-sm text-gray-600">
