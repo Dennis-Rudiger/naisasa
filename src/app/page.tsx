@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { MagnifyingGlassIcon, CalendarIcon, MapPinIcon, ArrowRightIcon } from '@heroicons/react/24/outline'
+import EventCard from '@/components/EventCard'
 
 const heroImages = [
   '/images/hero1.jpg',
@@ -111,36 +112,7 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {trendingEvents.map((event) => (
-              <Link
-                key={event.id}
-                href={`/events/${event.id}`}
-                className="card hover-lift hover-glow"
-              >
-                <div className="relative aspect-[16/9] rounded-xl overflow-hidden mb-4">
-                  <Image
-                    src={event.image}
-                    alt={event.title}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <h3 className="font-display font-bold text-xl mb-2">{event.title}</h3>
-                    <div className="flex items-center text-gray-600 text-sm mb-2">
-                      <CalendarIcon className="h-4 w-4 mr-2" />
-                      {event.date}
-                    </div>
-                    <div className="flex items-center text-gray-600 text-sm">
-                      <MapPinIcon className="h-4 w-4 mr-2" />
-                      {event.location}
-                    </div>
-                  </div>
-                  <span className="text-success font-medium">
-                    KES {event.price}
-                  </span>
-                </div>
-              </Link>
+              <EventCard key={event.id} event={event} />
             ))}
           </div>
         </div>
@@ -174,7 +146,7 @@ const categories = [
 
 const trendingEvents = [
   {
-    id: 1,
+    id: '1',
     title: 'Summer Music Festival',
     date: 'Aug 15, 2024',
     location: 'Nairobi',
@@ -182,7 +154,7 @@ const trendingEvents = [
     image: '/images/event1.jpg',
   },
   {
-    id: 2,
+    id: '2',
     title: 'Tech Conference 2024',
     date: 'Sep 20, 2024',
     location: 'Mombasa',
@@ -190,7 +162,7 @@ const trendingEvents = [
     image: '/images/tech1.jpg',
   },
   {
-    id: 3,
+    id: '3',
     title: 'Food & Wine Festival',
     date: 'Oct 5, 2024',
     location: 'Kisumu',
