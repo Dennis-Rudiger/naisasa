@@ -27,7 +27,7 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative h-[80vh] flex items-center">
+      <section className="relative h-[60vh] md:h-[80vh] flex items-center">
         <div className="absolute inset-0 bg-gradient-to-r from-primary-dark/90 to-primary/80" />
         <div className="absolute inset-0">
           <Image
@@ -39,36 +39,38 @@ export default function Home() {
           />
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 text-white">
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 text-white">
           <div className="max-w-3xl">
-            <h1 className="text-5xl md:text-6xl font-display font-bold mb-6 animate-fade-down">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display font-bold mb-4 md:mb-6 animate-fade-down">
               Discover Amazing Events in Your Area
             </h1>
-            <p className="text-xl mb-8 text-secondary/90 animate-fade-up">
+            <p className="text-lg md:text-xl mb-6 md:mb-8 text-secondary/90 animate-fade-up">
               Find and book tickets for concerts, workshops, sports events and more
             </p>
 
-            <div className="flex items-center bg-white/10 backdrop-blur-md rounded-full p-2 mb-8">
+            <div className="flex items-center bg-white/10 backdrop-blur-md rounded-full p-2 md:p-3">
               <input
                 type="text"
                 placeholder="Search events..."
-                className="w-full bg-transparent border-none text-white placeholder-white/70 focus:ring-0"
+                className="w-full px-4 bg-transparent border-none text-white placeholder-white/70 focus:ring-0 text-sm md:text-base"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
-              <button className="btn-accent">
-                <MagnifyingGlassIcon className="h-6 w-6" />
+              <button className="btn-accent !p-2 md:!p-3">
+                <MagnifyingGlassIcon className="h-5 w-5" />
               </button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Featured Categories */}
-      <section className="py-16 bg-background">
+      {/* Categories Section */}
+      <section className="py-8 md:py-16 bg-background">
         <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-3xl font-display font-bold mb-8">Browse Categories</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <h2 className="text-2xl md:text-3xl font-display font-bold mb-6 md:mb-8">
+            Browse Categories
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
             {categories.map((category) => (
               <Link
                 key={category.name}
@@ -101,16 +103,18 @@ export default function Home() {
       </section>
 
       {/* Trending Events */}
-      <section className="py-16">
+      <section className="py-8 md:py-16">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-display font-bold">Trending Events</h2>
-            <Link href="/events" className="btn-primary">
-              View All <ArrowRightIcon className="h-5 w-5 ml-2" />
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 md:mb-8">
+            <h2 className="text-2xl md:text-3xl font-display font-bold mb-4 sm:mb-0">
+              Trending Events
+            </h2>
+            <Link href="/events" className="btn-primary text-sm md:text-base">
+              View All <ArrowRightIcon className="h-4 w-4 md:h-5 md:w-5 ml-2" />
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {trendingEvents.map((event) => (
               <EventCard key={event.id} event={event} />
             ))}
