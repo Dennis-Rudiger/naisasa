@@ -1,41 +1,13 @@
-export const BEAR_IMAGES = {
-  watch: [
-    '/src/img/watch_bear_0.png',
-    '/src/img/watch_bear_1.png',
-    '/src/img/watch_bear_2.png',
-    '/src/img/watch_bear_3.png',
-    '/src/img/watch_bear_4.png',
-    '/src/img/watch_bear_5.png',
-    '/src/img/watch_bear_6.png',
-    '/src/img/watch_bear_7.png',
-    '/src/img/watch_bear_8.png',
-    '/src/img/watch_bear_9.png',
-    '/src/img/watch_bear_10.png',
-    '/src/img/watch_bear_11.png',
-    '/src/img/watch_bear_12.png',
-    '/src/img/watch_bear_13.png',
-    '/src/img/watch_bear_14.png',
-    '/src/img/watch_bear_15.png',
-    '/src/img/watch_bear_16.png',
-    '/src/img/watch_bear_17.png',
-    '/src/img/watch_bear_18.png',
-    '/src/img/watch_bear_19.png',
-    '/src/img/watch_bear_20.png',
-  ],
-  hide: [
-    '/src/img/hide_bear_0.png',
-    '/src/img/hide_bear_1.png',
-    '/src/img/hide_bear_2.png',
-    '/src/img/hide_bear_3.png',
-    '/src/img/hide_bear_4.png',
-    '/src/img/hide_bear_5.png',
+export const BEAR_STATES = {
+  IDLE: 'IDLE',
+  WATCHING: 'WATCHING',
+  HIDING: 'HIDING',
+  PEEKING: 'PEEKING',
+} as const;
 
-  ],
-  peek: [
-    '/src/img/peek_bear_0.png',
-    '/src/img/peek_bear_1.png',
-    '/src/img/peek_bear_2.png',
-    '/src/img/peek_bear_3.png',
-  
-  ],
+export const BEAR_IMAGES = {
+  [BEAR_STATES.IDLE]: '/assets/img/watch_bear_1.png',
+  [BEAR_STATES.WATCHING]: '/assets/img/watch_bear_2.png',
+  [BEAR_STATES.HIDING]: '/assets/img/hide_bear_1.png',
+  [BEAR_STATES.PEEKING]: '/assets/img/peak_bear_1.png',
 };
