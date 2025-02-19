@@ -4,44 +4,29 @@ const nextConfig = {
     domains: ['images.unsplash.com', 'res.cloudinary.com'],
     unoptimized: true
   },
-  // Use SWC compiler
   swcMinify: true,
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
-  poweredByHeader: false,
-  webpack: (config, { isServer, dev }) => {
+  webpack: (config, { dev, isServer }) => {
+    // Add asset handling
     config.module.rules.push({
       test: /\.(png|jpg|gif|svg)$/i,
       type: 'asset/resource'
     })
 
-    // Add bundle analyzer in development with dynamic port
-    if (dev && !isServer) {
+    // Only add analyzer in production build
+    if (!isServer && process.env.ANALYZE === 'true') {
       const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer')
       config.plugins.push(
         new BundleAnalyzerPlugin({
-          analyzerMode: 'server',
-          analyzerPort: 'auto', // This will automatically find an available port
-          openAnalyzer: false,
+          analyzerMode: 'static',
+          reportFilename: './analyze/client.html'
         })
       )
     }
 
-    // Log bundle sizes
-    config.plugins.push({
-      apply: (compiler) => {
-        compiler.hooks.done.tap('LogBundleSizes', (stats) => {
-          const { assets } = stats.toJson();
-          console.log('\nBundle sizes:');
-          assets.forEach(asset => {
-            console.log(`${asset.name}: ${(asset.size / 1024).toFixed(2)}kb`);
-          });
-        });
-      },
-    });
-
-    return config;
+    return config
   },
 }
 

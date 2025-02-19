@@ -3,7 +3,14 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { MagnifyingGlassIcon, CalendarIcon, MapPinIcon, ArrowRightIcon } from '@heroicons/react/24/outline'
+import { 
+  MagnifyingGlassIcon, 
+  CalendarIcon, 
+  MapPinIcon, 
+  ArrowRightIcon,
+  ComputerDesktopIcon,
+  GiftIcon 
+} from '@heroicons/react/24/outline'
 import EventCard from '@/components/EventCard'
 
 const heroImages = [
@@ -102,6 +109,52 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Virtual Events Section */}
+      <section className="py-8 md:py-16 bg-blue-50">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 md:mb-8">
+            <div className="flex items-center gap-3">
+              <ComputerDesktopIcon className="h-8 w-8 text-blue-600" />
+              <h2 className="text-2xl md:text-3xl font-display font-bold">
+                Virtual Events
+              </h2>
+            </div>
+            <Link href="/events/virtual" className="btn-primary bg-blue-600 hover:bg-blue-700 text-sm md:text-base">
+              View All Virtual Events <ArrowRightIcon className="h-4 w-4 md:h-5 md:w-5 ml-2" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+            {virtualEvents.map((event) => (
+              <EventCard key={event.id} event={event} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Free Events Section */}
+      <section className="py-8 md:py-16 bg-green-50">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 md:mb-8">
+            <div className="flex items-center gap-3">
+              <GiftIcon className="h-8 w-8 text-green-600" />
+              <h2 className="text-2xl md:text-3xl font-display font-bold">
+                Free Events
+              </h2>
+            </div>
+            <Link href="/events/free" className="btn-primary bg-green-600 hover:bg-green-700 text-sm md:text-base">
+              View All Free Events <ArrowRightIcon className="h-4 w-4 md:h-5 md:w-5 ml-2" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+            {freeEvents.map((event) => (
+              <EventCard key={event.id} event={event} />
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Trending Events */}
       <section className="py-8 md:py-16">
         <div className="max-w-7xl mx-auto px-4">
@@ -146,6 +199,69 @@ const categories = [
     icon: '/images/categories/food.jpg', 
     count: 21 
   },
+]
+
+const virtualEvents = [
+  {
+    id: 'v1',
+    title: 'Tech Conference 2024',
+    date: 'Mar 15, 2024',
+    location: 'Online',
+    price: '1,500',
+    image: '/images/virtual-conf.jpg',
+    isVirtual: true,
+    virtualLink: 'https://meet.google.com/virtual-conference'
+  },
+  {
+    id: 'v2',
+    title: 'Digital Art Workshop',
+    date: 'Apr 1, 2024',
+    location: 'Online',
+    price: '800',
+    image: '/images/virtual-art.jpg',
+    isVirtual: true,
+    virtualLink: 'https://zoom.us/art-workshop'
+  },
+  {
+    id: 'v3',
+    title: 'Virtual Fitness Class',
+    date: 'Mar 20, 2024',
+    location: 'Online',
+    price: '500',
+    image: '/images/virtual-fitness.jpg',
+    isVirtual: true,
+    virtualLink: 'https://zoom.us/fitness-class'
+  }
+]
+
+const freeEvents = [
+  {
+    id: 'f1',
+    title: 'Community Workshop',
+    date: 'Mar 10, 2024',
+    location: 'Nairobi Community Center',
+    price: '0',
+    image: '/images/community.jpg',
+    isFree: true
+  },
+  {
+    id: 'f2',
+    title: 'Tech Meetup',
+    date: 'Mar 25, 2024',
+    location: 'iHub Nairobi',
+    price: '0',
+    image: '/images/meetup.jpg',
+    isFree: true
+  },
+  {
+    id: 'f3',
+    title: 'Art Exhibition',
+    date: 'Apr 5, 2024',
+    location: 'National Museum',
+    price: '0',
+    image: '/images/exhibition.jpg',
+    isFree: true
+  }
 ]
 
 const trendingEvents = [
