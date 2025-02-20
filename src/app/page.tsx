@@ -11,7 +11,7 @@ import {
   ComputerDesktopIcon,
   GiftIcon 
 } from '@heroicons/react/24/outline'
-import EventCard from '@/components/EventCard'
+import EventCard from '@/components/EventCard/Card'
 
 const heroImages = [
   '/images/hero1.jpg',
