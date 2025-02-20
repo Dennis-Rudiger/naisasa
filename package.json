@@ -6,19 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "db:seed": "node prisma/seed.js",
-    "db:reset-all": "node prisma/reset-all.js",
-    "db:reset": "npm run db:reset-all && npx prisma migrate dev --name init",
-    "analyze": "ANALYZE=true npm run build",
-    "prisma:clean": "powershell -File scripts/clean-prisma.ps1",
-    "prisma:reset": "npm run prisma:clean && npx prisma migrate dev --name init"
+    "lint": "next lint"
   },
   "dependencies": {
-    "@headlessui/react": "^1.7.17",
     "@heroicons/react": "^2.0.18",
-    "@hookform/resolvers": "^3.10.0",
-    "@prisma/client": "5.7.1",
+    "@prisma/client": "^5.7.1",
     "@tailwindcss/forms": "^0.5.7",
     "axios": "^1.6.2",
     "bcryptjs": "^2.4.3",
@@ -30,13 +22,11 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-dropzone": "^14.2.3",
-    "react-hook-form": "^7.54.2",
     "react-hot-toast": "^2.4.1",
     "zod": "^3.22.4"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
-    "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20.10.6",
     "@types/react": "^18.2.46",
     "@types/react-dom": "^18.2.18",
@@ -44,13 +34,8 @@
     "eslint": "^8.56.0",
     "eslint-config-next": "14.0.4",
     "postcss": "^8.4.32",
-    "prisma": "5.7.1",
+    "prisma": "^5.7.1",
     "tailwindcss": "^3.4.0",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.3.3",
-    "webpack-bundle-analyzer": "^4.10.1"
-  },
-  "prisma": {
-    "seed": "node prisma/seed.js"
+    "typescript": "^5.3.3"
   }
 }

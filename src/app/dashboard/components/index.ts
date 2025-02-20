@@ -1,0 +1,7 @@
+export { default as DashboardHeader } from './DashboardHeader'
+export { default as MyTickets } from './MyTickets'
+export { default as SavedEvents } from './SavedEvents'
+export { default as PurchaseHistory } from './PurchaseHistory'
+export { default as Profile } from './Profile'
+export { default as UpcomingEvents } from './UpcomingEvents'
+export { default as PastEvents } from './PastEvents'

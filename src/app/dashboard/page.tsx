@@ -9,11 +9,11 @@ import {
   ClockIcon,
   UserCircleIcon,
 } from '@heroicons/react/24/outline'
-import DashboardHeader from '@/components/dashboard/DashboardHeader'
-import UpcomingEvents from '@/components/dashboard/UpcomingEvents'
-import SavedEvents from '@/components/dashboard/SavedEvents'
-import PastEvents from '@/components/dashboard/PastEvents'
-import Profile from '@/components/dashboard/Profile'
+import DashboardHeader from 'src/app/dashboard/components/DashboardHeader'
+import UpcomingEvents from 'src/app/dashboard/components/UpcomingEvents'
+import SavedEvents from 'src/app/dashboard/components/SavedEvents'
+import PastEvents from 'src/app/dashboard/components/PastEvents'
+import Profile from 'src/app/dashboard/components/Profile'
 
 export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState(0)
