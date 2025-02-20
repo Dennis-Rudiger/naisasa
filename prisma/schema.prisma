@@ -14,15 +14,16 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String     @id @default(cuid())
   name          String?
-  email         String    @unique
+  email         String     @unique
   password      String
   image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  events        Event[]   @relation("EventCreator")
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  events        Event[]    @relation("EventCreator")
   tickets       Ticket[]
+  favorites     Favorite[]
 }
 
 model Event {
@@ -37,37 +38,48 @@ model Event {
   status      EventStatus @default(ACTIVE)
   isVirtual   Boolean     @default(false)
   isFree      Boolean     @default(false)
-  virtualLink String?
+  virtualLink  String?
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   creatorId   String
-  creator     User        @relation("EventCreator", fields: [creatorId], references: [id])
+  creator     User        @relation("EventCreator", fields: [creatorId], references: [id], onDelete: Cascade)
   tickets     Ticket[]
-  categoryId  String
   category    Category    @relation(fields: [categoryId], references: [id])
+  categoryId  String
+  favorites   Favorite[]
+
+  @@index([categoryId])
+  @@index([creatorId])
 }
 
 model Category {
-  id      String  @id @default(cuid())
-  name    String  @unique
-  icon    String?
-  events  Event[]
+  id        String    @id @default(cuid())
+  name      String    @unique
+  icon      String?
+  events    Event[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model Ticket {
   id          String       @id @default(cuid())
   eventId     String
   userId      String
-  status      TicketStatus
+  status      TicketStatus @default(PENDING)
   quantity    Int
-  totalPrice  Decimal      @db.Decimal(10, 2)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  event       Event        @relation(fields: [eventId], references: [id])
-  user        User         @relation(fields: [userId], references: [id])
+  totalPrice  Decimal     @db.Decimal(10, 2)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  event       Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  paymentId   String?
+  payment     Payment?    @relation(fields: [paymentId], references: [id])
+
+  @@index([eventId])
+  @@index([userId])
+  @@index([paymentId])
 }
 
-// Update Contact model explicitly
 model Contact {
   id        String        @id @default(cuid())
   name      String        @db.VarChar(255)
@@ -79,7 +91,31 @@ model Contact {
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
 
-  @@map("contacts") // Explicitly name the table
+  @@map("contacts")
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  eventId   String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventId])
+  @@index([userId])
+  @@index([eventId])
+}
+
+model Payment {
+  id            String        @id @default(cuid())
+  amount        Decimal       @db.Decimal(10, 2)
+  provider      String        // 'MPESA', etc.
+  status        PaymentStatus @default(PENDING)
+  referenceId   String?       // MPesa transaction ID
+  tickets       Ticket[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 }
 
 enum EventStatus {
@@ -96,9 +132,14 @@ enum TicketStatus {
   USED
 }
 
-// Make sure ContactStatus enum is defined
 enum ContactStatus {
   PENDING
   RESOLVED
   SPAM
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
 }

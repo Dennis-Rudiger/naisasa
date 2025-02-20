@@ -1,14 +1,14 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { z } from 'zod'
-import type { Contact, Prisma } from '@prisma/client'
+import type { ContactFormData } from '@/types'
 
 const contactSchema = z.object({
-  name: z.string().min(2),
-  email: z.string().email(),
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  email: z.string().email('Invalid email address'),
   phone: z.string().optional(),
-  subject: z.string().min(5),
-  message: z.string().min(10),
+  subject: z.string().min(5, 'Subject must be at least 5 characters'),
+  message: z.string().min(10, 'Message must be at least 10 characters'),
 })
 
 export async function POST(req: Request) {
@@ -16,44 +16,36 @@ export async function POST(req: Request) {
     const body = await req.json()
     const validatedData = contactSchema.parse(body)
 
-    // Try using direct prisma call without transaction
-    const message = await prisma.contact.create({
+    const contact = await prisma.contact.create({
       data: {
         name: validatedData.name,
         email: validatedData.email,
-        phone: validatedData.phone ?? null, // Use nullish coalescing
+        phone: validatedData.phone ?? null,
         subject: validatedData.subject,
         message: validatedData.message,
-        status: 'PENDING'
-      }
+        status: 'PENDING',
+      },
     })
 
     return NextResponse.json({
       success: true,
-      message: 'Message sent successfully',
-      contactId: message.id
+      contact: {
+        id: contact.id,
+        createdAt: contact.createdAt.toISOString(),
+      },
     })
 
   } catch (error) {
-    // Add more detailed error logging
-    console.error('Contact form error:', {
-      error,
-      message: error instanceof Error ? error.message : 'Unknown error'
-    })
-
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Invalid form data', details: error.errors },
+        { error: 'Validation failed', details: error.errors },
         { status: 400 }
       )
     }
 
-    // Return more specific error message
+    console.error('[CONTACT_ERROR]', error)
     return NextResponse.json(
-      { 
-        error: 'Failed to send message',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      },
+      { error: 'Internal server error' },
       { status: 500 }
     )
   }

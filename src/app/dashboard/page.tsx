@@ -2,48 +2,72 @@
 
 import { useState } from 'react'
 import { Tab } from '@headlessui/react'
-import { TicketIcon, CalendarIcon, HeartIcon, ClockIcon } from '@heroicons/react/24/outline'
-import MyTickets from '@/components/dashboard/MyTickets'
-import SavedEvents from '@/components/dashboard/SavedEvents'
-import PurchaseHistory from '@/components/dashboard/PurchaseHistory'
+import { 
+  TicketIcon, 
+  HeartIcon,
+  CalendarIcon,
+  ClockIcon,
+  UserCircleIcon,
+} from '@heroicons/react/24/outline'
+import DashboardHeader from '@/components/dashboard/DashboardHeader'
 import UpcomingEvents from '@/components/dashboard/UpcomingEvents'
+import SavedEvents from '@/components/dashboard/SavedEvents'
+import PastEvents from '@/components/dashboard/PastEvents'
+import Profile from '@/components/dashboard/Profile'
 
-export default function Dashboard() {
+export default function DashboardPage() {
+  const [activeTab, setActiveTab] = useState(0)
+
   const tabs = [
-    { name: 'My Tickets', icon: TicketIcon, component: MyTickets },
-    { name: 'Saved Events', icon: HeartIcon, component: SavedEvents },
-    { name: 'Purchase History', icon: ClockIcon, component: PurchaseHistory },
-    { name: 'Upcoming Events', icon: CalendarIcon, component: UpcomingEvents },
+    { name: 'Upcoming Events', icon: CalendarIcon },
+    { name: 'Saved Events', icon: HeartIcon },
+    { name: 'Past Events', icon: ClockIcon },
+    { name: 'Profile', icon: UserCircleIcon },
   ]
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-12">
-      <Tab.Group>
-        <Tab.List className="flex space-x-4 overflow-x-auto pb-4">
-          {tabs.map(({ name, icon: Icon }) => (
-            <Tab
-              key={name}
-              className={({ selected }) =>
-                `flex items-center gap-2 px-6 py-3 rounded-xl transition-all ${
-                  selected
-                    ? 'bg-primary text-white shadow-lg shadow-primary/25'
-                    : 'bg-white hover:bg-gray-50'
-                }`
-              }
-            >
-              <Icon className="h-5 w-5" />
-              <span>{name}</span>
-            </Tab>
-          ))}
-        </Tab.List>
-        <Tab.Panels className="mt-8">
-          {tabs.map(({ name, component: Component }) => (
-            <Tab.Panel key={name}>
-              <Component />
+    <div className="min-h-screen bg-gray-50 pt-20">
+      <DashboardHeader />
+      
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <Tab.Group selectedIndex={activeTab} onChange={setActiveTab}>
+          <Tab.List className="flex space-x-2 rounded-xl bg-white p-1 shadow-sm mb-8">
+            {tabs.map((tab) => (
+              <Tab
+                key={tab.name}
+                className={({ selected }) =>
+                  `w-full rounded-lg py-3 px-4 text-sm font-medium leading-5
+                  ring-white ring-opacity-60 ring-offset-2 ring-offset-primary focus:outline-none
+                  ${selected 
+                    ? 'bg-primary text-white shadow' 
+                    : 'text-gray-600 hover:bg-primary/[0.12] hover:text-primary'
+                  }`
+                }
+              >
+                <div className="flex items-center justify-center gap-2">
+                  <tab.icon className="h-5 w-5" />
+                  <span>{tab.name}</span>
+                </div>
+              </Tab>
+            ))}
+          </Tab.List>
+
+          <Tab.Panels className="mt-2">
+            <Tab.Panel>
+              <UpcomingEvents />
             </Tab.Panel>
-          ))}
-        </Tab.Panels>
-      </Tab.Group>
+            <Tab.Panel>
+              <SavedEvents />
+            </Tab.Panel>
+            <Tab.Panel>
+              <PastEvents />
+            </Tab.Panel>
+            <Tab.Panel>
+              <Profile />
+            </Tab.Panel>
+          </Tab.Panels>
+        </Tab.Group>
+      </div>
     </div>
   )
 }

@@ -6,6 +6,9 @@ import { CalendarIcon, MapPinIcon, TicketIcon } from '@heroicons/react/24/outlin
 import Image from 'next/image'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
+import { HeartIcon as HeartOutline } from '@heroicons/react/24/outline'
+import { HeartIcon as HeartSolid } from '@heroicons/react/24/solid'
+import { useFavorites } from '@/context/FavoritesContext'
 
 interface EventCardProps {
   event: {
@@ -22,6 +25,7 @@ interface EventCardProps {
 export default function EventCard({ event, buttonText = "Buy Tickets" }: EventCardProps) {
   const { addItem } = useCart()
   const { data: session } = useSession()
+  const { isFavorite, toggleFavorite } = useFavorites()
 
   const handleAddToCart = () => {
     addItem({
@@ -44,6 +48,19 @@ export default function EventCard({ event, buttonText = "Buy Tickets" }: EventCa
           className="object-cover transition-transform duration-500 group-hover:scale-110"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        
+        {/* Add favorite button */}
+        <button
+          onClick={() => toggleFavorite(event.id)}
+          className="absolute top-2 right-2 p-2 rounded-full bg-white/80 backdrop-blur-sm
+                    hover:bg-white transition-colors duration-200"
+        >
+          {isFavorite(event.id) ? (
+            <HeartSolid className="h-5 w-5 text-red-500" />
+          ) : (
+            <HeartOutline className="h-5 w-5 text-gray-600" />
+          )}
+        </button>
       </div>
       
       <div className="space-y-3">

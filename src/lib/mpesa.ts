@@ -6,19 +6,31 @@ interface MPesaConfig {
   callbackUrl: string;
 }
 
+interface STKPushParams {
+  phone: string;
+  amount: number;
+  reference: string;
+}
+
 class MPesa {
-  private config: MPesaConfig;
+  private readonly consumerKey: string;
+  private readonly consumerSecret: string;
+  private readonly passKey: string;
+  private readonly shortcode: string;
   private baseUrl: string;
 
-  constructor(config: MPesaConfig) {
-    this.config = config;
+  constructor() {
+    this.consumerKey = process.env.MPESA_CONSUMER_KEY || '';
+    this.consumerSecret = process.env.MPESA_CONSUMER_SECRET || '';
+    this.passKey = process.env.MPESA_PASSKEY || '';
+    this.shortcode = process.env.MPESA_SHORTCODE || '';
     this.baseUrl = process.env.NODE_ENV === 'production'
       ? 'https://api.safaricom.com'
       : 'https://sandbox.safaricom.co.ke';
   }
 
   private async getAccessToken(): Promise<string> {
-    const auth = Buffer.from(`${this.config.consumerKey}:${this.config.consumerSecret}`).toString('base64');
+    const auth = Buffer.from(`${this.consumerKey}:${this.consumerSecret}`).toString('base64');
     
     const response = await fetch(`${this.baseUrl}/oauth/v1/generate?grant_type=client_credentials`, {
       method: 'GET',
@@ -31,12 +43,12 @@ class MPesa {
     return data.access_token;
   }
 
-  async stkPush(params: { amount: number; phone: string; reference: string }) {
+  async stkPush({ phone, amount, reference }: STKPushParams) {
     try {
       const accessToken = await this.getAccessToken();
       const timestamp = new Date().toISOString().replace(/[^0-9]/g, '').slice(0, -3);
       const password = Buffer.from(
-        `${this.config.shortCode}${this.config.passkey}${timestamp}`
+        `${this.shortcode}${this.passKey}${timestamp}`
       ).toString('base64');
 
       const response = await fetch(`${this.baseUrl}/mpesa/stkpush/v1/processrequest`, {
@@ -46,16 +58,16 @@ class MPesa {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          BusinessShortCode: this.config.shortCode,
+          BusinessShortCode: this.shortcode,
           Password: password,
           Timestamp: timestamp,
           TransactionType: 'CustomerPayBillOnline',
-          Amount: params.amount,
-          PartyA: params.phone,
-          PartyB: this.config.shortCode,
-          PhoneNumber: params.phone,
-          CallBackURL: `${this.config.callbackUrl}/api/mpesa/callback`,
-          AccountReference: params.reference,
+          Amount: amount,
+          PartyA: phone,
+          PartyB: this.shortcode,
+          PhoneNumber: phone,
+          CallBackURL: `${process.env.NEXT_PUBLIC_APP_URL}/api/mpesa/callback`,
+          AccountReference: reference,
           TransactionDesc: 'Event Ticket Purchase',
         }),
       });
@@ -73,15 +85,12 @@ class MPesa {
       throw new Error(data.ResponseDescription || 'STK push failed');
     } catch (error) {
       console.error('MPesa STK Push error:', error);
-      throw error;
+      return {
+        success: false,
+        error: 'Payment initiation failed',
+      };
     }
   }
 }
 
-export const mpesa = new MPesa({
-  consumerKey: process.env.MPESA_CONSUMER_KEY!,
-  consumerSecret: process.env.MPESA_CONSUMER_SECRET!,
-  passkey: process.env.MPESA_PASSKEY!,
-  shortCode: process.env.MPESA_SHORTCODE!,
-  callbackUrl: process.env.NEXT_PUBLIC_APP_URL!,
-});
+export const mpesa = new MPesa();
