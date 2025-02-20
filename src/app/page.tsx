@@ -125,7 +125,10 @@ export default function Home() {
                 Virtual Events
               </h2>
             </div>
-            <Link href="/events/virtual" className="btn-primary bg-blue-600 hover:bg-blue-700 text-sm md:text-base">
+            <Link 
+              href="/events/virtual" 
+              className="btn-primary bg-blue-600 hover:bg-blue-700 text-sm md:text-base"
+            >
               View All Virtual Events <ArrowRightIcon className="h-4 w-4 md:h-5 md:w-5 ml-2" />
             </Link>
           </div>
@@ -148,7 +151,10 @@ export default function Home() {
                 Free Events
               </h2>
             </div>
-            <Link href="/events/free" className="btn-primary bg-green-600 hover:bg-green-700 text-sm md:text-base">
+            <Link 
+              href="/events/free" 
+              className="btn-primary bg-green-600 hover:bg-green-700 text-sm md:text-base"
+            >
               View All Free Events <ArrowRightIcon className="h-4 w-4 md:h-5 md:w-5 ml-2" />
             </Link>
           </div>
