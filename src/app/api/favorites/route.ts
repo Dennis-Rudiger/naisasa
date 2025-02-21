@@ -1,99 +1,71 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
-import { z } from 'zod'
 
-const favoriteSchema = z.object({
-  eventId: z.string().min(1),
-})
-
-export async function POST(req: Request) {
+export async function GET(request: Request) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+    const session = await getServerSession()
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const body = await req.json()
-    const { eventId } = favoriteSchema.parse(body)
-
-    const existingFavorite = await prisma.favorite.findUnique({
-      where: {
-        userId_eventId: {
-          userId: session.user.id,
-          eventId,
-        },
-      },
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      include: {
+        favorites: true
+      }
     })
 
-    if (existingFavorite) {
-      await prisma.favorite.delete({
-        where: {
-          id: existingFavorite.id,
-        },
-      })
-
-      return NextResponse.json({
-        success: true,
-        message: 'Favorite removed',
-      })
-    }
-
-    const favorite = await prisma.favorite.create({
-      data: {
-        userId: session.user.id,
-        eventId,
-      },
-    })
-
-    return NextResponse.json({
-      success: true,
-      message: 'Favorite added',
-      favorite,
-    })
-
+    return NextResponse.json(user?.favorites || [])
   } catch (error) {
-    console.error('[FAVORITE_ERROR]', error)
+    console.error('Get favorites error:', error)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Failed to fetch favorites' },
       { status: 500 }
     )
   }
 }
 
-export async function GET(req: Request) {
+export async function POST(request: Request) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+    const session = await getServerSession()
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const favorites = await prisma.favorite.findMany({
-      where: {
-        userId: session.user.id,
-      },
-      include: {
-        event: {
-          include: {
-            category: true,
-          },
-        },
-      },
+    const { eventId } = await request.json()
+    const user = await prisma.user.findUniqueOrThrow({
+      where: { email: session.user.email }
     })
 
-    return NextResponse.json(favorites)
+    const existingFavorite = await prisma.favorite.findUnique({
+      where: {
+        userId_eventId: {
+          userId: user.id,
+          eventId
+        }
+      }
+    })
 
+    if (existingFavorite) {
+      await prisma.favorite.delete({
+        where: { id: existingFavorite.id }
+      })
+      return NextResponse.json({ isFavorited: false })
+    }
+
+    await prisma.favorite.create({
+      data: {
+        userId: user.id,
+        eventId
+      }
+    })
+
+    return NextResponse.json({ isFavorited: true })
   } catch (error) {
-    console.error('[FAVORITES_GET_ERROR]', error)
+    console.error('Toggle favorite error:', error)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Failed to update favorite' },
       { status: 500 }
     )
   }

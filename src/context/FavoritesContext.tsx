@@ -1,84 +1,82 @@
 'use client'
 
-import { createContext, useContext, useState, useCallback, useEffect } from 'react'
+import { createContext, useContext, useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
-import toast from 'react-hot-toast'
 
 interface FavoritesContextType {
   favorites: string[]
-  toggleFavorite: (eventId: string) => Promise<void>
   isFavorite: (eventId: string) => boolean
-  loadFavorites: () => Promise<void>
+  toggleFavorite: (eventId: string) => Promise<void>
+  isLoading: boolean
 }
 
-const FavoritesContext = createContext<FavoritesContextType>({
-  favorites: [],
-  toggleFavorite: async () => {},
-  isFavorite: () => false,
-  loadFavorites: async () => {}
-})
+const FavoritesContext = createContext<FavoritesContextType | undefined>(undefined)
 
 export function FavoritesProvider({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession()
   const [favorites, setFavorites] = useState<string[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
-  const toggleFavorite = useCallback(async (eventId: string) => {
-    if (!session?.user) {
-      toast.error('Please sign in to save events')
-      return
+  useEffect(() => {
+    const fetchFavorites = async () => {
+      if (!session?.user) {
+        setFavorites([])
+        setIsLoading(false)
+        return
+      }
+
+      try {
+        const response = await fetch('/api/favorites')
+        if (!response.ok) throw new Error('Failed to fetch favorites')
+        const data = await response.json()
+        setFavorites(data.map((fav: any) => fav.eventId))
+      } catch (error) {
+        console.error('Error fetching favorites:', error)
+      } finally {
+        setIsLoading(false)
+      }
     }
+
+    fetchFavorites()
+  }, [session])
+
+  const isFavorite = (eventId: string) => favorites.includes(eventId)
+
+  const toggleFavorite = async (eventId: string) => {
+    if (!session?.user) return
 
     try {
       const response = await fetch('/api/favorites', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ eventId }),
+        body: JSON.stringify({ eventId })
       })
 
-      if (!response.ok) throw new Error('Failed to update favorites')
-
+      if (!response.ok) throw new Error('Failed to update favorite')
+      
+      const { isFavorited } = await response.json()
+      
       setFavorites(prev => 
-        prev.includes(eventId)
-          ? prev.filter(id => id !== eventId)
-          : [...prev, eventId]
-      )
-
-      toast.success(
-        favorites.includes(eventId)
-          ? 'Removed from favorites'
-          : 'Added to favorites'
+        isFavorited 
+          ? [...prev, eventId]
+          : prev.filter(id => id !== eventId)
       )
     } catch (error) {
-      toast.error('Failed to update favorites')
-    }
-  }, [session, favorites])
-
-  const isFavorite = useCallback((eventId: string) => {
-    return favorites.includes(eventId)
-  }, [favorites])
-
-  const loadFavorites = async () => {
-    if (!session?.user) return
-
-    try {
-      const response = await fetch('/api/user/favorites/check')
-      if (!response.ok) throw new Error('Failed to fetch favorites')
-      const { favorites } = await response.json()
-      setFavorites(favorites)
-    } catch (error) {
-      console.error('Error loading favorites:', error)
+      console.error('Error toggling favorite:', error)
     }
   }
 
-  useEffect(() => {
-    loadFavorites()
-  }, [loadFavorites])
-
   return (
-    <FavoritesContext.Provider value={{ favorites, toggleFavorite, isFavorite, loadFavorites }}>
+    <FavoritesContext.Provider value={{ favorites, isFavorite, toggleFavorite, isLoading }}>
       {children}
     </FavoritesContext.Provider>
   )
 }
 
-export const useFavorites = () => useContext(FavoritesContext)
+export const useFavorites = () => {
+  const context = useContext(FavoritesContext)
+  if (context === undefined) {
+    throw new Error('useFavorites must be used within a FavoritesProvider')
+  }
+  return context
+}
