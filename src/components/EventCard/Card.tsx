@@ -46,7 +46,7 @@ export default function EventCard({ event, onFavoriteToggled }: EventCardProps) 
       title: event.title,
       price: parseFloat(event.price.toString().replace(',', '')),
       quantity: 1,
-      image: event.image
+      image: event.image ?? undefined // Convert null to undefined
     })
     toast.success('Added to cart')
   }
