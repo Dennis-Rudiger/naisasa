@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Tab } from '@headlessui/react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
@@ -29,9 +30,41 @@ const tabs = [
 ]
 
 export default function DashboardPage() {
+  const searchParams = useSearchParams()
+  const tabParam = searchParams.get('tab')
+  const router = useRouter()
   const [selectedTab, setSelectedTab] = useState(0)
   const { data: session, status } = useSession()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  
+  // Set the active tab based on URL query parameter
+  useEffect(() => {
+    if (tabParam) {
+      switch(tabParam.toLowerCase()) {
+        case 'upcoming':
+          setSelectedTab(0)
+          break
+        case 'saved':
+          setSelectedTab(1)
+          break
+        case 'past':
+          setSelectedTab(2)
+          break
+        case 'profile':
+          setSelectedTab(3)
+          break
+        default:
+          setSelectedTab(0)
+      }
+    }
+  }, [tabParam])
+  
+  // Update URL when tab changes
+  const handleTabChange = (index: number) => {
+    setSelectedTab(index)
+    const tabNames = ['upcoming', 'saved', 'past', 'profile']
+    router.push(`/dashboard?tab=${tabNames[index]}`, { scroll: false })
+  }
   
   if (status === 'unauthenticated') {
     return (
@@ -127,7 +160,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Desktop Tabs */}
-        <Tab.Group selectedIndex={selectedTab} onChange={setSelectedTab}>
+        <Tab.Group selectedIndex={selectedTab} onChange={handleTabChange}>
           <Tab.List className="grid grid-cols-4 gap-2 sm:flex sm:space-x-2 rounded-xl bg-white p-2 shadow-sm mb-6 border border-gray-100">
             {tabs.map((tab) => (
               <Tab

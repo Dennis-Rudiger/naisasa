@@ -25,9 +25,10 @@ import ImageWithFallback from '@/components/ui/ImageWithFallback'
 
 interface EventCardProps {
   event: Event
+  onFavoriteToggled?: () => void  // Add this prop to fix the TypeScript error
 }
 
-export default function EventCard({ event }: EventCardProps) {
+export default function EventCard({ event, onFavoriteToggled }: EventCardProps) {
   const { data: session } = useSession()
   const [isExpanded, setIsExpanded] = useState(false)
   const { isFavorite, toggleFavorite } = useFavorites()
@@ -59,7 +60,11 @@ export default function EventCard({ event }: EventCardProps) {
     
     try {
       await toggleFavorite(event.id)
-      toast.success(isFavorite(event.id) ? 'Removed from favorites' : 'Added to favorites')
+      
+      // Call the callback if provided
+      if (onFavoriteToggled) {
+        onFavoriteToggled()
+      }
     } catch (error) {
       toast.error('Failed to update favorites')
     }

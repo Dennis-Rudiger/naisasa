@@ -19,12 +19,14 @@ import {
   CheckCircleIcon
 } from '@heroicons/react/24/outline'
 import { useSession } from 'next-auth/react'
+import axios from 'axios'
+import { v4 as uuidv4 } from 'uuid'
 
 // Form validation schema
 const checkoutSchema = z.object({
   email: z.string().email('Please enter a valid email'),
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  phone: z.string().min(10, 'Phone number must be at least 10 digits'),
+  name: z.string().min(1, 'Name is required'),
+  phone: z.string().min(1, 'Phone number is required'),
   agreeToTerms: z.boolean().refine((val) => val === true, {
     message: 'You must agree to the terms and conditions'
   })
