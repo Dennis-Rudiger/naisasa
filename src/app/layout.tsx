@@ -1,23 +1,29 @@
+import { Suspense } from 'react'
 import { Inter, Poppins } from 'next/font/google'
 import type { Metadata, Viewport } from 'next'
 import { Toaster } from 'react-hot-toast'
 import Providers from '@/components/Providers'
 import Footer from '@/components/Footer'
 import Navbar from '@/components/Navbar'
+import LoadingSpinner from '@/components/LoadingSpinner'
 import '../styles/globals.css'
 
-// Load fonts
+// Optimize font loading
 const inter = Inter({ 
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-inter'
+  variable: '--font-inter',
+  preload: true,
+  fallback: ['system-ui', '-apple-system', 'BlinkMacSystemFont'],
 })
 
 const poppins = Poppins({
   weight: ['400', '500', '600', '700'],
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-poppins'
+  variable: '--font-poppins',
+  preload: true,
+  fallback: ['system-ui', '-apple-system', 'BlinkMacSystemFont'],
 })
 
 export const viewport: Viewport = {
@@ -78,25 +84,27 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html 
-      lang="en" 
-      className={`${inter.variable} ${poppins.variable}`}
-    >
+    <html lang="en" className={`${inter.variable} ${poppins.variable}`}>
+      <head>
+        <link 
+          rel="preconnect" 
+          href="https://res.cloudinary.com"
+        />
+        <link
+          rel="dns-prefetch"
+          href="https://res.cloudinary.com"
+        />
+      </head>
       <body className={`${inter.className} min-h-screen flex flex-col`}>
         <Providers>
           <Navbar />
-          <main className="flex-1">
-            {children}
-          </main>
+          <Suspense fallback={<LoadingSpinner />}>
+            <main className="flex-1">
+              {children}
+            </main>
+          </Suspense>
           <Footer />
-          <Toaster 
-            position="bottom-center"
-            containerStyle={{
-              bottom: 40,
-              left: 20,
-              right: 20,
-            }}
-          />
+          <Toaster position="bottom-center" />
         </Providers>
       </body>
     </html>

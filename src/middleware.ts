@@ -1,32 +1,27 @@
-import { withAuth } from "next-auth/middleware";
-import { NextResponse } from "next/server";
-import type { NextRequestWithAuth } from "next-auth/middleware";
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
-export default withAuth(
-  function middleware(request: NextRequestWithAuth) {
-    // Redirect authenticated users away from signin page
-    if (request.nextUrl.pathname.startsWith('/auth/signin') && request.nextauth.token) {
-      return NextResponse.redirect(new URL('/', request.url));
-    }
+export function middleware(request: NextRequest) {
+  const response = NextResponse.next()
 
-    return NextResponse.next();
-  },
-  {
-    callbacks: {
-      authorized: ({ token }) => !!token,
-    },
-    pages: {
-      signIn: "/auth/login",
-    },
+  // Add security headers
+  response.headers.set('X-DNS-Prefetch-Control', 'on')
+  response.headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload')
+  response.headers.set('X-Frame-Options', 'SAMEORIGIN')
+  response.headers.set('X-Content-Type-Options', 'nosniff')
+  response.headers.set('Referrer-Policy', 'origin-when-cross-origin')
+  
+  // Add caching headers for static assets
+  if (request.nextUrl.pathname.startsWith('/_next/static') || 
+      request.nextUrl.pathname.startsWith('/images')) {
+    response.headers.set('Cache-Control', 'public, max-age=31536000, immutable')
   }
-);
+
+  return response
+}
 
 export const config = {
   matcher: [
-    '/dashboard/:path*',
-    '/events/create',
-    '/events/edit/:path*',
-    '/auth/signin',
-    '/checkout/:path*',
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
-};
+}

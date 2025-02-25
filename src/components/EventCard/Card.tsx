@@ -19,16 +19,23 @@ import { useCart } from '@/context/CartContext'
 import toast from 'react-hot-toast'
 import { Event } from '@/types/events'
 import { useSession } from 'next-auth/react'
-import ShareModal from '../ShareModal'
+import dynamic from 'next/dynamic'
+import { memo } from 'react'
 import { getPlaceholderImage } from '@/utils/imageUtils'
 import ImageWithFallback from '@/components/ui/ImageWithFallback'
+
+// Dynamically import heavy components
+const ShareModal = dynamic(() => import('../ShareModal'), {
+  loading: () => <div className="hidden">Loading...</div>,
+  ssr: false
+})
 
 interface EventCardProps {
   event: Event
   onFavoriteToggled?: () => void  // Add this prop to fix the TypeScript error
 }
 
-export default function EventCard({ event, onFavoriteToggled }: EventCardProps) {
+const EventCard = memo(function EventCard({ event, onFavoriteToggled }: EventCardProps) {
   const { data: session } = useSession()
   const [isExpanded, setIsExpanded] = useState(false)
   const { isFavorite, toggleFavorite } = useFavorites()
@@ -249,4 +256,6 @@ export default function EventCard({ event, onFavoriteToggled }: EventCardProps) 
       />
     </>
   )
-}
+})
+
+export default EventCard
