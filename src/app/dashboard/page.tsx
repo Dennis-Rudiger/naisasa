@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Tab } from '@headlessui/react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { 
   CalendarDaysIcon as CalendarIcon,
   HeartIcon,
@@ -10,7 +10,8 @@ import {
   UserIcon,
   TicketIcon,
   BellIcon,
-  CogIcon
+  Bars3Icon,
+  XMarkIcon
 } from '@heroicons/react/24/outline'
 import SavedEvents from './components/SavedEvents'
 import UpcomingEvents from './components/UpcomingEvents'
@@ -18,6 +19,7 @@ import PastEvents from './components/PastEvents'
 import Profile from './components/Profile'
 import { useSession } from 'next-auth/react'
 import Image from 'next/image'
+import Link from 'next/link'
 
 const tabs = [
   { name: 'Upcoming', icon: CalendarIcon, color: 'bg-primary/10 text-primary' },
@@ -29,6 +31,7 @@ const tabs = [
 export default function DashboardPage() {
   const [selectedTab, setSelectedTab] = useState(0)
   const { data: session, status } = useSession()
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   
   if (status === 'unauthenticated') {
     return (
@@ -73,31 +76,34 @@ export default function DashboardPage() {
             </div>
             
             <div className="flex items-center space-x-4">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="btn-secondary px-4 py-2"
-                aria-label="Notifications"
-              >
-                <BellIcon className="h-5 w-5 mr-2" />
-                <span className="hidden sm:inline">Notifications</span>
-              </motion.button>
+              <div className="hidden sm:block">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="btn-secondary px-4 py-2"
+                  aria-label="Notifications"
+                >
+                  <BellIcon className="h-5 w-5 mr-2" />
+                  <span>Notifications</span>
+                </motion.button>
+              </div>
               
+              {/* Mobile menu toggle */}
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="btn-outline px-4 py-2 border border-gray-300 rounded-full hover:border-primary flex items-center"
-                aria-label="Settings"
+                className="btn-outline px-4 py-2 border border-gray-300 rounded-full hover:border-primary flex items-center sm:hidden"
+                aria-label="Options"
+                onClick={() => setMobileMenuOpen(true)}
               >
-                <CogIcon className="h-5 w-5 mr-2" />
-                <span className="hidden sm:inline">Settings</span>
+                <Bars3Icon className="h-5 w-5" />
               </motion.button>
             </div>
           </div>
         </div>
 
         {/* Stats Overview */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-8">
           {[
             { label: 'Events Attended', value: '12', icon: TicketIcon, color: 'bg-blue-50 text-blue-500' },
             { label: 'Saved Events', value: '8', icon: HeartIcon, color: 'bg-pink-50 text-pink-500' },
@@ -120,7 +126,7 @@ export default function DashboardPage() {
           ))}
         </div>
 
-        {/* Main Tabs */}
+        {/* Desktop Tabs */}
         <Tab.Group selectedIndex={selectedTab} onChange={setSelectedTab}>
           <Tab.List className="grid grid-cols-4 gap-2 sm:flex sm:space-x-2 rounded-xl bg-white p-2 shadow-sm mb-6 border border-gray-100">
             {tabs.map((tab) => (
@@ -187,6 +193,95 @@ export default function DashboardPage() {
           </Tab.Panels>
         </Tab.Group>
       </div>
+
+      {/* Mobile Side Menu */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div 
+            className="fixed inset-0 z-50 md:hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            {/* Backdrop */}
+            <motion.div 
+              className="fixed inset-0 bg-black/30 backdrop-blur-sm"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setMobileMenuOpen(false)}
+            />
+
+            {/* Side panel */}
+            <motion.div
+              className="fixed right-0 top-0 bottom-0 w-64 bg-white shadow-xl overflow-y-auto"
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            >
+              <div className="p-6 space-y-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold">Menu</h2>
+                  <button 
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="p-2 rounded-full hover:bg-gray-100"
+                  >
+                    <XMarkIcon className="h-5 w-5 text-gray-500" />
+                  </button>
+                </div>
+                
+                <div className="space-y-1 pt-5 pb-3">
+                  <Link
+                    href="/dashboard"
+                    className="flex items-center px-4 py-3 text-base font-medium text-gray-900 rounded-lg hover:bg-gray-100"
+                  >
+                    <CalendarIcon className="h-5 w-5 text-gray-500 mr-3" />
+                    Dashboard
+                  </Link>
+                  <Link
+                    href="/profile"
+                    className="flex items-center px-4 py-3 text-base font-medium text-gray-900 rounded-lg hover:bg-gray-100"
+                  >
+                    <UserIcon className="h-5 w-5 text-gray-500 mr-3" />
+                    Profile
+                  </Link>
+                  <Link
+                    href="/notifications"
+                    className="flex items-center px-4 py-3 text-base font-medium text-gray-900 rounded-lg hover:bg-gray-100"
+                  >
+                    <BellIcon className="h-5 w-5 text-gray-500 mr-3" />
+                    Notifications
+                    <span className="ml-auto bg-primary text-white py-0.5 px-2 rounded-full text-xs">
+                      3
+                    </span>
+                  </Link>
+                </div>
+
+                <div className="border-t border-gray-200 pt-5">
+                  <Link
+                    href="/settings"
+                    className="flex items-center px-4 py-3 text-base font-medium text-gray-900 rounded-lg hover:bg-gray-100"
+                  >
+                    Settings
+                  </Link>
+                  <Link
+                    href="/help"
+                    className="flex items-center px-4 py-3 text-base font-medium text-gray-900 rounded-lg hover:bg-gray-100"
+                  >
+                    Help Center
+                  </Link>
+                  <button
+                    className="flex w-full items-center px-4 py-3 text-base font-medium text-gray-900 rounded-lg hover:bg-gray-100"
+                  >
+                    Sign out
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
