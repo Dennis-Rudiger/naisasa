@@ -1,15 +1,28 @@
+export interface User {
+  id: string;
+  name: string | null;
+  email: string;
+  image: string | null;
+}
+
 export interface Event {
-  id: string
-  title: string
-  description: string
-  location: string
-  date: string
-  image: string
-  price: number | string
-  isFree: boolean
-  isVirtual: boolean
-  category: string
-  status: string
+  id: string;
+  title: string;
+  description: string;
+  location: string;
+  date: string;
+  image: string | null;
+  price: number | string;
+  capacity: number;
+  isVirtual: boolean;
+  isFree: boolean;
+  virtualLink?: string;
+  category: string;
+  status: 'DRAFT' | 'ACTIVE' | 'CANCELLED' | 'COMPLETED';
+  creator?: {
+    name: string | null;
+    image: string | null;
+  };
 }
 
 export interface CartItem {
