@@ -13,6 +13,8 @@ import {
 } from '@heroicons/react/24/outline'
 import EventCard from '@/components/EventCard/Card'
 import { getVirtualEvents, getFreeEvents, getTrendingEvents } from '@/data/events'
+import ImageWithFallback from '@/components/ui/ImageWithFallback'
+import { getPlaceholderImage } from '@/utils/imageUtils'
 
 const heroImages = [
   '/images/hero1.jpg',
@@ -92,9 +94,10 @@ export default function Home() {
               >
                 <div className="card overflow-hidden">
                   <div className="relative h-48 mb-4 rounded-lg overflow-hidden">
-                    <Image
+                    <ImageWithFallback
                       src={category.icon}
                       alt={category.name}
+                      category={category.name.toLowerCase()}
                       fill
                       className="object-cover transition-transform duration-500 group-hover:scale-110"
                     />

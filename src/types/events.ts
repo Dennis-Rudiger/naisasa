@@ -2,17 +2,14 @@ export interface Event {
   id: string
   title: string
   description: string
-  date: string
   location: string
-  price: string | number
+  date: string
   image: string
-  status?: 'DRAFT' | 'ACTIVE' | 'CANCELLED' | 'COMPLETED'
-  isVirtual?: boolean
-  isFree?: boolean
-  virtualLink?: string
-  capacity?: number
-  creatorId?: string
-  categoryId?: string
+  price: number | string
+  isFree: boolean
+  isVirtual: boolean
+  category: string
+  status: string
 }
 
 export interface CartItem {

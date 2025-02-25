@@ -20,6 +20,7 @@ import toast from 'react-hot-toast'
 import { Event } from '@/types/events'
 import { useSession } from 'next-auth/react'
 import ShareModal from '../ShareModal'
+import { getPlaceholderImage } from '@/utils/imageUtils'
 
 interface EventCardProps {
   event: Event
@@ -34,6 +35,7 @@ export default function EventCard({ event }: EventCardProps) {
   const formattedTime = format(new Date(event.date), 'h:mm a')
   const [isFavorited, setIsFavorited] = useState(false)
   const [isShareModalOpen, setIsShareModalOpen] = useState(false)
+  const [imgSrc, setImgSrc] = useState(event.image || getPlaceholderImage(event.category))
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -98,11 +100,12 @@ export default function EventCard({ event }: EventCardProps) {
           {/* Image Section */}
           <motion.div layout className="relative aspect-[16/9]">
             <Image
-              src={event.image}
+              src={imgSrc}
               alt={event.title}
               fill
               className="object-cover"
               priority
+              onError={() => setImgSrc(getPlaceholderImage(event.category))}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
             
@@ -120,17 +123,17 @@ export default function EventCard({ event }: EventCardProps) {
                   <HeartOutline className="h-5 w-5 text-white" />
                 )}
               </motion.button>
-              <motion.button
+                <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 className="p-2 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20"
-                onClick={(e) => {
+                onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                   e.stopPropagation()
                   setIsShareModalOpen(true)
                 }}
-              >
+                >
                 <ShareIcon className="h-5 w-5 text-white" />
-              </motion.button>
+                </motion.button>
             </div>
 
             {/* Event Info Overlay */}
