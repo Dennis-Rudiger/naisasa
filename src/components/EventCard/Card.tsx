@@ -21,6 +21,7 @@ import { Event } from '@/types/events'
 import { useSession } from 'next-auth/react'
 import ShareModal from '../ShareModal'
 import { getPlaceholderImage } from '@/utils/imageUtils'
+import ImageWithFallback from '@/components/ui/ImageWithFallback'
 
 interface EventCardProps {
   event: Event
@@ -99,13 +100,13 @@ export default function EventCard({ event }: EventCardProps) {
         >
           {/* Image Section */}
           <motion.div layout className="relative aspect-[16/9]">
-            <Image
-              src={imgSrc}
+            <ImageWithFallback
+              src={event.image}
+              category={event.category}
               alt={event.title}
               fill
               className="object-cover"
               priority
-              onError={() => setImgSrc(getPlaceholderImage(event.category))}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
             

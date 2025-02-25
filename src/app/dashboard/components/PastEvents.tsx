@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import { ClockIcon } from '@heroicons/react/24/outline'
 import EventCard from '@/components/EventCard/Card'
 import type { Event } from '@/types/events'
+import ImageWithFallback from '@/components/ui/ImageWithFallback'
 
 export default function PastEvents() {
   const [events, setEvents] = useState<Event[]>([])

@@ -6,6 +6,7 @@ import { HeartIcon } from '@heroicons/react/24/outline'
 import EventCard from '@/components/EventCard/Card'
 import { useFavorites } from '@/context/FavoritesContext'
 import type { Event } from '@/types/events'
+import ImageWithFallback from '@/components/ui/ImageWithFallback'
 
 export default function SavedEvents() {
   const { favorites, isLoading } = useFavorites()

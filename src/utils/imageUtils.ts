@@ -28,6 +28,9 @@ export const getPlaceholderImage = (category?: string): string => {
   return placeholders[Math.floor(Math.random() * placeholders.length)];
 };
 
-export const handleImageError = (event: React.SyntheticEvent<HTMLImageElement, Event>, category?: string) => {
+export const handleImageError = (
+  event: React.SyntheticEvent<HTMLImageElement, Event>, 
+  category?: string
+) => {
   event.currentTarget.src = getPlaceholderImage(category);
 };
